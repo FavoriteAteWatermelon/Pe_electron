@@ -1,0 +1,2 @@
+  VID     DID   ClassCode Rev Bus Dev Fun  Width
+  1FC8    0920   060400   80   01  00  00  16X

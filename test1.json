@@ -1,0 +1,8 @@
+[
+{"name": "scan","station": 1,"selected": false,  "items" :[]},
+{"name": "bioschk","station": 1, "selected": false, "items" :[{"Version":"" },{"Release": ""}]},
+{"name": "ecfw_c","station": 1,"selected": false,  "items" :[]},
+{"name": "mem", "station": 1,"selected": false,  "items" :[]},
+{"name": "pcie1", "station": 1,"selected": false,  "items" :[]},
+{"name": "tl502chk","station": 1,"selected": false,  "items" :[]}
+]
