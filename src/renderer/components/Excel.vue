@@ -36,8 +36,9 @@
     </div>
   </div>
         <el-dialog
-
-  title="机种名"
+        :show-close="false"
+  :close-on-click-modal="false"
+  title="BIOS设定"
   :visible.sync="showBios"
   width="500px"
   >
@@ -49,6 +50,8 @@
     <template slot="prepend">release:</template>
   
   </el-input>
+  <el-button @click="setBios"  type="primary">确定</el-button>
+  <el-button @click="closeBios"  type="primary">取消</el-button>
 </el-dialog>
   </div>
     <div class="btn" @click="start">Next</div>
@@ -94,6 +97,28 @@ export default {
     
   },
   methods: {
+
+    setBios() {
+      console.log( typeof(this.bios.release) )
+      if(this.bios.version.length === 4 && /[0-1][0-9]\/[0-3][1-9]\/2\d\d\d/.test(this.bios.release)) {
+        this.$message({
+          duration: 3000,
+          type: 'success',
+          message: '设定成功!'
+          });
+          this.showBios = false
+      }else {
+        this.$message({
+          duration: 3000,
+          type: 'warning',
+          message: '设置不正确!'
+          });
+      }
+    },
+    closeBios() {
+      this.bios.version = ''
+      this.bios.release = ''
+    },
     // 确认输入bios的信息
     start () {
       this.nextList = []

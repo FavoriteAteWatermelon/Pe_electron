@@ -22,7 +22,7 @@
 
   title="机种名"
   :visible.sync="showName"
-  width="30%"
+  width="400px"
   :modal= "mask"
   >
     <el-input  placeholder="请输入机种名" v-model="name">
@@ -160,6 +160,7 @@ const process = require('child_process')
         let xmlRes = xmlInfo.replace(new RegExp(/#name/,'g'), `<Model>601-${this.name}</Model>`).replace(new RegExp(/#item/,'g'),tem3)
         
         await fs.writeFileSync(this.testExport + '/' + 'MSITEST.xml',xmlRes,'utf8')
+        await fs.writeFileSync(this.testExport + '/Wencode/' + 'MSITEST.xml',xmlRes,'utf8')
         // 对文件加密
         this.decodeXml()
         await fs.mkdirSync(this.testExport + '/BATCH')
