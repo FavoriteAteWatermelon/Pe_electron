@@ -13,7 +13,7 @@
  
       </div>
     
-      <div class="export">    
+      <div @click="test" class="export">    
              <div>导出({{testExport}})</div>
   <!-- <input type="file"  @change="changeInputSrc($event,1)" ref="exportSrc" style="opacity: 0" webkitdirectory  /> -->
  </div>
@@ -50,6 +50,10 @@ const process = require('child_process')
       secretList:{
         type: Array,
         default: []
+      },
+      bios: {
+        type: Object,
+        default:{}
       }
     },
     data () {
@@ -76,6 +80,9 @@ const process = require('child_process')
     
 
       },
+      test() {
+        // console.log(this.bios)
+      },
       comfirm() {
         if (this.name === '') {
           alert('请输入主板名')
@@ -86,7 +93,7 @@ const process = require('child_process')
           this.showName= false
 
           setTimeout(() => {
-            this.start(`echo ${this.name} Function testing......`)
+            this.start(`echo 601-${this.name} Function testing......`)
           }, 1000);
       
         }
@@ -116,7 +123,12 @@ const process = require('child_process')
         } 
         // await fsDir.copySync(`${this.src}/${item.name.toLowerCase()}`,`${this.testExport}/${item.name.toLowerCase()}`)
       },1000)
-      
+
+        //  1. 处理bios
+        let biosInfo = fs.readFileSync(this.src+ '/BACKUP/'+'BIOSCHK.bat','utf8')
+        let biosRes = biosInfo.replace(new RegExp(/#Version/,'g'), `find "BIOS Version      = ${this.bios.version}" BIOS.INI`).replace(new RegExp(/#Release/,'g'), `find "BIOS Release Date = ${this.bios.release}" BIOS.INI`)
+        await  fs.writeFileSync(this.testExport+ '/BACKUP/' + 'BIOSCHK.bat',biosRes,'utf8')
+        // 2.  替换test.bat内容
         let info = fs.readFileSync(this.src+ '/' + 'test.bat','utf8')
         
         let tem1 = ''
@@ -133,7 +145,7 @@ const process = require('child_process')
 
         
         await fs.writeFileSync(this.testExport + '/' + 'test.bat',result,'utf8')
-        // console.log(this.secretList)
+   
         // 处理加密文件MSITEST.xml
 
         let xmlInfo = fs.readFileSync(this.src+ '/' + 'MSITEST.xml','utf8')
@@ -145,9 +157,10 @@ const process = require('child_process')
  
         })
         
-        let xmlRes = xmlInfo.replace(new RegExp(/#name/,'g'), `<Model>${this.name}</Model>`).replace(new RegExp(/#item/,'g'),tem3)
+        let xmlRes = xmlInfo.replace(new RegExp(/#name/,'g'), `<Model>601-${this.name}</Model>`).replace(new RegExp(/#item/,'g'),tem3)
         
         await fs.writeFileSync(this.testExport + '/' + 'MSITEST.xml',xmlRes,'utf8')
+        // 对文件加密
         this.decodeXml()
         await fs.mkdirSync(this.testExport + '/BATCH')
         this.secretList.forEach((item,index)=>{

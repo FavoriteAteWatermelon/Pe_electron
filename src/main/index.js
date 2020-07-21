@@ -20,9 +20,9 @@ function createWindow () {
    */
   Menu.setApplicationMenu(null)
   mainWindow = new BrowserWindow({
-    // height: 420,
+    height: 600,
     // useContentSize: true,
-    // width: 400,
+    width: 1100,
     // 边框隐藏
     // frame: false,
     // 隐藏MAC标题

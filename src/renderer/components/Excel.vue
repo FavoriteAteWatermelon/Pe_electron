@@ -1,7 +1,7 @@
 <template>
 <div class="layout">
   <transition   name="pannel">
-  <Pannel :list = "nextList" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
+  <Pannel :bios="bios"  :list = "nextList" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
   </transition>
  
   <div class="boxBig">
@@ -31,11 +31,25 @@
   <div class="title">For_3T</div>
     <div class="item-con" v-for="(item,i) in test3" :key="i">    
        <item @isSelected="isSelected(3,i)"  :info="item" :index="i"></item>
-     <div v-if="item.items.length" :class="{showDetail:item.showDetail }" class="showBtn" @click="showDetailClick()">
-     </div>
+
      
     </div>
   </div>
+        <el-dialog
+
+  title="机种名"
+  :visible.sync="showBios"
+  width="500px"
+  >
+    <el-input  placeholder="1.20" v-model="bios.version">
+    <template slot="prepend">version:</template>
+  
+  </el-input>
+    <el-input placeholder="06/03/2020" v-model="bios.release">
+    <template slot="prepend">release:</template>
+  
+  </el-input>
+</el-dialog>
   </div>
     <div class="btn" @click="start">Next</div>
 </div>
@@ -55,6 +69,10 @@ export default {
     return {
       showPanel: false,
       showBios: false,
+      bios:{
+        version: '',
+        release: ''
+      },
       nextList: [],
       secretList:[],
       test1: [
@@ -76,6 +94,7 @@ export default {
     
   },
   methods: {
+    // 确认输入bios的信息
     start () {
       this.nextList = []
       this.test1.forEach((item) => {
@@ -103,16 +122,16 @@ this.showPanel = false
     isSelected (index, i) {
       // console.log(i,selected)
       if (index === 1) {
-        if ( this.test1[i]['name'] === 'BIOSCHK' && (!this.test1[i]['items'][0]['Version']|| !this.test1[i]['items'][1]['Release'] )) {
+        if ( this.test1[i]['name'] === 'bioschk' && (!this.bios.version || !this.bios.release)) {
         
           this.showBios = true
         } else {
-          // console.log(  this.testList[i])
+          // console.log(  this.test1[i])
           this.test1[i]['selected'] = !this.test1[i]['selected']
         }
       } else if(index === 2) {
       
-        if ( this.testList[i]['name'] === 'BIOSB' && (!this.testList[i]['items'][0]['Version']|| !this.testList[i]['items'][1]['Release'] )) {
+        if ( this.testList[i]['name'] === 'bioschk' && (!this.testList[i]['items'][0]['Version']|| !this.testList[i]['items'][1]['Release'] )) {
         
           this.showBios = true
         } else {
@@ -120,18 +139,14 @@ this.showPanel = false
           this.testList[i]['selected'] = !this.testList[i]['selected']
         }
       } else {
-        if ( this.test3[i]['name'] === 'BIOSB' && (!this.test3[i]['items'][0]['Version']|| !this.test3[i]['items'][1]['Release'] )) {
-        
-          this.showBios = true
-        } else {
-          console.log(  this.testList[i])
+
           this.test3[i]['selected'] = !this.test3[i]['selected']
-        }
+        
       }
 
     },
     showDetailClick(i) {
-      // this.showBios = !this.showBios
+      this.showBios = !this.showBios
     }
   },
   components: {
