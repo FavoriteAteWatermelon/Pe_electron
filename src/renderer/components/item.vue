@@ -4,7 +4,6 @@
     <div class="bg" >
         {{info.name}}
     </div>
-
     <span >{{info.name}}</span>
   </div>
 

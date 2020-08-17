@@ -1,8 +1,16 @@
-[
-{"name": "uuidlan_c","selected": false,  "items" :[]},
-{"name": "mcufw_c","selected": false,  "items" :[]},
-{"name": "rlan_c", "selected": false,  "items" :[]},
-{"name": "rlanid_c", "selected": false,  "items" :[]},
-{"name": "jrtd1","selected": false,  "items" :[]},
-{"name": "settime","selected": false,  "items" :[]}
+[   
+  {"name": "bioschk","station": 2, "selected": false, "items" :[{"Version":"" },{"Release": ""}]},
+  {"name": "logochk","selected": false,  "items" :[]},
+  {"name": "dmichk","selected": false,  "items" :[]},
+  {"name": "uuidlan_c","selected": false,  "items" :[]},
+  {"name": "rlan_c","selected": false,  "items" :[]},
+  {"name": "rlanid_c","selected": false,  "items" :[]},
+  {"name": "mcufw_c","selected": false,  "items" :[]},
+  {"name": "settime","selected": false,  "items" :[]},
+  {"name": "jtbt1","selected": false,  "items" :[]},
+  {"name": "tl423","selected": false,  "items" :[4]},
+  {"name": "jrtd1","selected": false,  "items" :[]},
+  {"name": "usb20","selected": false,  "items" :[2]},
+  {"name": "usb30","selected": false,  "items" :[3]},
+  {"name": "hwm","selected": false,  "items" :[]}
 ]

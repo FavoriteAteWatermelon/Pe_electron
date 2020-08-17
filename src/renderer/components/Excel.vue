@@ -1,7 +1,7 @@
 <template>
 <div class="layout">
   <transition   name="pannel">
-  <Pannel :bios="bios"  :list = "nextList" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
+  <Pannel ref="pannel" :tl396="tl396" :tl423="tl423" :usb2="usb2" :usb3="usb3" :bios="bios"  :nextList1 ="nextList1" :nextList2="nextList2" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
   </transition>
  
   <div class="boxBig">
@@ -10,21 +10,17 @@
     <div class="item-con" v-for="(item,i) in test1" :key="i">
       
        <item @isSelected="isSelected(1,i)"  :info="item" :index="i"></item>
-     <div v-if="item.items.length" :class="{showDetail:item.showDetail }" class="showBtn" @click="showDetailClick()">
-
+     <div v-if="item.items.length" :class="{showDetail:item.showDetail }" class="showBtn" @click="showDetailClick(item.name)">
      </div>
      
     </div>
-
-
   </div>
   <div class="box">
   <div class="title">For_2ST</div>
     <div class="item-con" v-for="(item,i) in testList" :key="i">    
        <item @isSelected="isSelected(2,i)"  :info="item" :index="i"></item>
-     <div v-if="item.items.length" :class="{showDetail:item.showDetail }" class="showBtn" @click="showDetailClick()">
+      <div v-if="item.items.length" :class="{showDetail:item.showDetail }" class="showBtn" @click="showDetailClick(item.name)">
      </div>
-     
     </div>
   </div>
     <div class="box">
@@ -32,7 +28,8 @@
     <div class="item-con" v-for="(item,i) in test3" :key="i">    
        <item @isSelected="isSelected(3,i)"  :info="item" :index="i"></item>
 
-     
+    <div v-if="item.items.length" :class="{showDetail:item.showDetail }" class="showBtn" @click="showDetailClick(item.name)">
+     </div>
     </div>
   </div>
         <el-dialog
@@ -53,6 +50,26 @@
   <el-button @click="setBios"  type="primary">确定</el-button>
   <el-button @click="closeBios"  type="primary">取消</el-button>
 </el-dialog>
+<el-dialog    width="500px"  :visible.sync="showUSB"      :show-close="false"
+  :close-on-click-modal="false" title="USB和tl396等设置">
+    <el-input type="number" placeholder="请输入USB2的数量" v-model.number="usb2">
+    <template slot="prepend">USB2:</template>
+  
+  </el-input>
+    <el-input type="number" placeholder="请输入USB3的数量" v-model.number="usb3">
+    <template slot="prepend">USB3:</template>
+  
+  </el-input>
+    <el-input type="number" placeholder="请输入tl396的总数" v-model.number="tl396">
+    <template slot="prepend">tl396:</template>
+  
+  </el-input>
+    <el-input type="number" placeholder="请输入tl423的数量" v-model.number="tl423">
+    <template slot="prepend">tl423:</template>
+  
+  </el-input>
+ <el-button @click="setUSB"  type="primary">确定</el-button>
+</el-dialog>
   </div>
     <div class="btn" @click="start">Next</div>
 </div>
@@ -72,11 +89,17 @@ export default {
     return {
       showPanel: false,
       showBios: false,
+      showUSB: false,
       bios:{
         version: '',
         release: ''
       },
-      nextList: [],
+      usb2: 0,
+      usb3: 0,
+      tl396: 0,
+      tl423: 0,
+      nextList1: [],
+      nextList2:[],
       secretList:[],
       test1: [
       ],
@@ -97,9 +120,24 @@ export default {
     
   },
   methods: {
-
+    setUSB () {
+      if (this.usb2 >0 && this.usb3 >0 && this.tl423 >=0 && this.tl396 >= 0) {
+        this.$message({
+          duration: 3000,
+          type: 'success',
+          message: 'USB和tl设定成功!'
+          });
+        this.showUSB = false
+      } else {
+        this.$message({
+          duration: 3000,
+          type: 'error',
+          message: 'USB设置必须为大于0的整数!'
+          });
+      }
+    },
     setBios() {
-      console.log( typeof(this.bios.release) )
+      // console.log( typeof(this.bios.release) )
       if(this.bios.version.length === 4 && /[0-1][0-9]\/[0-3][1-9]\/2\d\d\d/.test(this.bios.release)) {
         this.$message({
           duration: 3000,
@@ -116,20 +154,23 @@ export default {
       }
     },
     closeBios() {
-      this.bios.version = ''
-      this.bios.release = ''
+      // this.bios.version = ''
+      // this.bios.release = ''
+      this.showBios= false
     },
     // 确认输入bios的信息
     start () {
-      this.nextList = []
+      this.nextList1 = []
+      this.nextList2 = []
+      this.secretList = []
       this.test1.forEach((item) => {
         if (item.selected === true) {
-          this.nextList.push(item)
+          this.nextList1.push(item)
         }
       })
       this.testList.forEach(item => {
               if (item.selected === true) {
-          this.nextList.push(item)
+          this.nextList2.push(item)
         }
       })
       this.test3.forEach(item => {
@@ -139,6 +180,7 @@ export default {
       })
       // console.log()
       this.showPanel = true
+      this.$refs.pannel.showName =true
     },
     closePannel () {
 this.showPanel = false
@@ -150,28 +192,65 @@ this.showPanel = false
         if ( this.test1[i]['name'] === 'bioschk' && (!this.bios.version || !this.bios.release)) {
         
           this.showBios = true
-        } else {
+        } else if ((this.usb2 === 0 || this.usb3 === 0) && (this.test1[i]['name'] === 'usb20' || this.test1[i]['name'] === 'usb30'||  this.test1[i]['name'] === 'tl396'|| this.test1[i]['name'] === 'tl423')){
           // console.log(  this.test1[i])
-          this.test1[i]['selected'] = !this.test1[i]['selected']
+            this.showUSB = true
+        }else {
+          if (this.test1[i]['name'] === 'tl423' &&  this.tl423 === 0) {
+              this.showUSB = true
+          } else if (this.test1[i]['name'] === 'tl396' &&  this.tl396 === 0) {
+             this.showUSB = true
+          } else {
+             this.test1[i]['selected'] = !this.test1[i]['selected']
+          }
+           
         }
       } else if(index === 2) {
-      
-        if ( this.testList[i]['name'] === 'bioschk' && (!this.testList[i]['items'][0]['Version']|| !this.testList[i]['items'][1]['Release'] )) {
-        
-          this.showBios = true
-        } else {
-          // console.log(  this.testList[i])
+         if (this.testList[i]['name'] === 'bioschk' && (!this.bios.version || !this.bios.release)) {
+            this.showBios = true
+         }else if((this.usb2 === 0 || this.usb3 === 0) && (this.testList[i]['name'] === 'usb20' || this.testList[i]['name'] === 'usb30'||  this.testList[i]['name'] === 'tl396'|| this.testList[i]['name'] === 'tl423')) {
+              this.showUSB = true
+         } else {
+            if (this.testList[i]['name'] === 'tl423' &&  this.tl423 === 0) {
+              this.showUSB = true
+          } else if (this.testList[i]['name'] === 'tl396' &&  this.tl396 === 0) {
+             this.showUSB = true
+          } else {
           this.testList[i]['selected'] = !this.testList[i]['selected']
-        }
-      } else {
+            }
+           
+          
+         }
 
-          this.test3[i]['selected'] = !this.test3[i]['selected']
+          // console.log(  this.testList[i])
+          
         
+      } else {
+        if ((this.usb2 === 0 || this.usb3 === 0) && (this.test2[i]['name'] === 'usb20' || this.test2[i]['name'] === 'usb30'||  this.test2[i]['name'] === 'tl396'|| this.test2[i]['name'] === 'tl423' )) {
+        
+            this.showUSB = true
+        } else {
+          if (this.test3[i]['name'] === 'tl423' &&  this.tl423 === 0) {
+              this.showUSB = true
+          } else if (this.test3[i]['name'] === 'tl396' &&  this.tl396 === 0) {
+             this.showUSB = true
+          } else {
+             this.test3[i]['selected'] = !this.test3[i]['selected']
+          }
+           
+        }        
       }
 
     },
-    showDetailClick(i) {
-      this.showBios = !this.showBios
+    showDetailClick(name) {
+      if (name === 'bioschk') {
+        this.showBios = true
+      } else if (name === 'usb20' || name === 'usb30') {
+        this.showUSB = true
+      }else {
+        this.showUSB = true
+      }
+      
     }
   },
   components: {

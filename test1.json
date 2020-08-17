@@ -1,8 +1,22 @@
 [
-{"name": "scan","station": 1,"selected": false,  "items" :[]},
-{"name": "bioschk","station": 1, "selected": false, "items" :[{"Version":"" },{"Release": ""}]},
-{"name": "ecfw_c","station": 1,"selected": false,  "items" :[]},
-{"name": "mem", "station": 1,"selected": false,  "items" :[]},
-{"name": "pcie1", "station": 1,"selected": false,  "items" :[]},
-{"name": "tl502chk","station": 1,"selected": false,  "items" :[]}
+  {"name": "scan","station": 1,"selected": false,  "items" :[]},
+  {"name": "bioschk","station": 1, "selected": false, "items" :[{"Version":"" },{"Release": ""}]},
+  {"name": "logochk","station": 1,"selected": false,  "items" :[]},
+  {"name": "ecfw_c","station": 1,"selected": false,  "items" :[]},
+  {"name": "mem","station": 1,"selected": false,  "items" :[]},
+  {"name": "pcie1","station": 1,"selected": false,  "items" :[]},
+  {"name": "pcie3","station": 1,"selected": false,  "items" :[]},
+  {"name": "m2_1","station": 1,"selected": false,  "items" :[]},
+  {"name": "m2_2","station": 1,"selected": false,  "items" :[]},
+  {"name": "tl502chk","station": 1,"selected": false,  "items" :[]},
+  {"name": "type_c","station": 1,"selected": false,  "items" :[]},
+  {"name": "tl423","selected": false,  "items" :[4]},
+  {"name": "usb20","selected": false,  "items" :[2]},
+  {"name": "usb30","selected": false,  "items" :[3]},
+  {"name": "ilan_w","station": 1,"selected": false,  "items" :[]},
+  {"name": "rlan_w","station": 1,"selected": false,  "items" :[]},
+  {"name": "lan_w", "station": 1,"selected": false,  "items" :[]},
+  {"name": "dmi_w", "station": 1,"selected": false,  "items" :[]},
+  {"name": "uuid_w","station": 1,"selected": false,  "items" :[]},
+  {"name": "wload_tst","station": 1,"selected": false,  "items" :[]}
 ]
