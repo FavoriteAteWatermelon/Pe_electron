@@ -69,6 +69,31 @@
   
   </el-input>
  <el-button @click="setUSB"  type="primary">确定</el-button>
+ <el-button @click="hideUSB"  type="primary">取消</el-button>
+</el-dialog>
+<el-dialog    width="500px"  :visible.sync="showLan"      :show-close="false"
+  :close-on-click-modal="false" title="Lan设置">
+   <div ref="lan" v-for="item in lanInfo " :key="item.title" style="margin-bottom: 10px;border-bottom: 1px solid #eee">
+     <div class="title" style="font-size: 14px;font-weight: bold">{{item.title}}:</div>
+      <el-checkbox v-for="city in item.children" :label="city.name" :key="city.name">{{city.name}}</el-checkbox>
+   </div>
+  
+  
+ <el-button @click="setLan"  type="primary">确定</el-button>
+ <el-button @click="showLan = false"  type="primary">取消</el-button>
+</el-dialog>
+<el-dialog    width="500px"  :visible.sync="showAudio"      :show-close="false"
+  :close-on-click-modal="false" title="Audio设置">
+  <div >
+    <el-radio-group @change="changeAudio" v-model="audio">
+    <el-radio :label="F3">F3</el-radio>
+    <el-radio :label="F5">F5</el-radio>
+    <el-radio :label="F6">F6</el-radio>
+  </el-radio-group>
+  </div>
+
+ <el-button style="margin-top: 20px" @click="setLan"  type="primary">确定</el-button>
+ <el-button @click="showAudio = false"  type="primary">取消</el-button>
 </el-dialog>
   </div>
     <div class="btn" @click="start">Next</div>
@@ -90,6 +115,9 @@ export default {
       showPanel: false,
       showBios: false,
       showUSB: false,
+      showLan: false,
+      showAudio: false,
+      audio: 'f3',
       bios:{
         version: '',
         release: ''
@@ -106,8 +134,8 @@ export default {
       testList: [
       ],
       test3: [
-
-      ]
+      ],
+      lanInfo: []
     }
   },
   mounted() {
@@ -117,9 +145,18 @@ export default {
      this.testList= data2
      let data3 = JSON.parse(fs.readFileSync('./test3.json','utf8'))
      this.test3 = data3
+     this.lanInfo = JSON.parse(fs.readFileSync('./lan.json','utf8'))
     
   },
   methods: {
+    changeAudio () {
+      console.log(this.audio)
+    },
+    setLan () {
+      // console.log(this.$refs.lan[0].children[1].classList.length)
+      console.log(this.$refs.lan[0].children[1].innerText)
+      // innerText
+    },
     setUSB () {
       if (this.usb2 >0 && this.usb3 >0 && this.tl423 >=0 && this.tl396 >= 0) {
         this.$message({
@@ -138,7 +175,7 @@ export default {
     },
     setBios() {
       // console.log( typeof(this.bios.release) )
-      if(this.bios.version.length === 4 && /[0-1][0-9]\/[0-3][1-9]\/2\d\d\d/.test(this.bios.release)) {
+      if(this.bios.version.length === 4 && /[0-1][0-9]\/[0-3][0-9]\/2\d\d\d/.test(this.bios.release)) {
         this.$message({
           duration: 3000,
           type: 'success',
@@ -152,6 +189,9 @@ export default {
           message: '设置不正确!'
           });
       }
+    },
+    hideUSB() {
+      this.showUSB = false
     },
     closeBios() {
       // this.bios.version = ''
@@ -218,15 +258,14 @@ this.showPanel = false
           } else {
           this.testList[i]['selected'] = !this.testList[i]['selected']
             }
-           
-          
          }
 
           // console.log(  this.testList[i])
           
         
       } else {
-        if ((this.usb2 === 0 || this.usb3 === 0) && (this.test2[i]['name'] === 'usb20' || this.test2[i]['name'] === 'usb30'||  this.test2[i]['name'] === 'tl396'|| this.test2[i]['name'] === 'tl423' )) {
+        // console.log(this.test3)
+        if ((this.usb2 === 0 || this.usb3 === 0) && (this.test3[i]['name'] === 'usb20' || this.test3[i]['name'] === 'usb30'||  this.test3[i]['name'] === 'tl396'|| this.test3[i]['name'] === 'tl423' )) {
         
             this.showUSB = true
         } else {
@@ -245,10 +284,13 @@ this.showPanel = false
     showDetailClick(name) {
       if (name === 'bioschk') {
         this.showBios = true
-      } else if (name === 'usb20' || name === 'usb30') {
+      } else if (name === 'usb20' || name === 'usb30' || name === 'tl396' || name === 'tl423') {
         this.showUSB = true
-      }else {
-        this.showUSB = true
+      }else if (name === 'lan_w') {
+        // console.log(this.lanInfo)
+        this.showLan = true
+      } else {
+        this.showAudio = true
       }
       
     }
@@ -346,12 +388,12 @@ this.showPanel = false
     position: relative;
     width: 0px;
     height: 0;
-    border-top: 8px solid transparent;
-    border-left: 12px solid #fff;
+    border-top: 12px solid #fff;
+    border-left: 8px solid transparent;
     border-right: 8px  solid transparent;
     border-bottom: 8px solid transparent;
-    top: -30px;
-    left: 1px;
+    top: -4px;
+    left: calc(50% - 6px);
     transition: all 0.3s;
     z-index: 2;
     cursor: pointer;

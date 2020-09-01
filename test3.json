@@ -27,5 +27,5 @@
   {"name": "hdmitest","selected": false,  "items" :[]},
   {"name": "tl714","selected": false,  "items" :[]},
   {"name": "hdtestchk","selected": false,  "items" :[]},
-  {"name": "audio","selected": false,  "items" :[]}
+  {"name": "audio","selected": false,  "items" :[1]}
   ]

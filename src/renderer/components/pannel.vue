@@ -70,12 +70,12 @@
   >
   <div class="centerP">
     <div class="close-btn" @click="showErr=false">x</div>
-  <div class="err-title">缺少.bat文件</div>
+  <div class="err-title" >缺少批处理文件</div>
     <div class="item" v-for="(item) in  lackBatList.values()" :key="item.name">
 
        {{item}}
    </div>
-  <div class="err-title">缺少bat对应的文件夹</div>
+  <div class="err-title">缺少处理文件对应的文件夹</div>
       <div class="item" v-for="item in  lackFileList" :key="item.name">
        {{Object.keys(item)[0]}}.bat中缺乏引用{{Object.values(item)[0]}}的文件夹
       </div>
@@ -469,6 +469,11 @@ const process = require('child_process')
   background: #ffffff;
   z-index: 300;
   transition: all 0.5s;
+}
+.err-title {
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
 }
 .showError{
   position: absolute;

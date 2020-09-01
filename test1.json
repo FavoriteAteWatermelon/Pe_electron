@@ -15,7 +15,7 @@
   {"name": "usb30","selected": false,  "items" :[3]},
   {"name": "ilan_w","station": 1,"selected": false,  "items" :[]},
   {"name": "rlan_w","station": 1,"selected": false,  "items" :[]},
-  {"name": "lan_w", "station": 1,"selected": false,  "items" :[]},
+  {"name": "lan_w", "station": 1,"selected": false,  "items" :[5]},
   {"name": "dmi_w", "station": 1,"selected": false,  "items" :[]},
   {"name": "uuid_w","station": 1,"selected": false,  "items" :[]},
   {"name": "wload_tst","station": 1,"selected": false,  "items" :[]}
