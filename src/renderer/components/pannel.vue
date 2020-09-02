@@ -95,6 +95,10 @@ const fsDir = require('fs-extra')
 const process = require('child_process')
   export default {
     props: {
+      audio: {
+        type: String,
+        default: ''
+      },
       usb2: {
         type: Number,
         default: 0
@@ -352,6 +356,11 @@ const process = require('child_process')
            
           })
           
+        }
+        if (item.name === 'audio') {
+          // console.log(item)
+           await fs.renameSync(`${this.testExport}/hdtest/F${this.audio}.cfg`, `${this.testExport}/hdtest/FRONT.cfg`)
+           await fs.renameSync(`${this.testExport}/hdtest/R${this.audio}.cfg`, `${this.testExport}/hdtest/REAR.cfg`)
         } 
         // await fsDir.copySync(`${this.src}/${item.name.toLowerCase()}`,`${this.testExport}/${item.name.toLowerCase()}`)
       },1000)
@@ -363,11 +372,11 @@ const process = require('child_process')
           // console.log(item)
           this.decodeAll(item.name)
         })
-        // this.list.forEach(async (item,index)=>{
-        //   // await fs.copyFileSync
-        //   await fs.copyFileSync(this.src + '/BACKUP/' + item.name +'.BAT',this.testExport + '/BACKUP/' )
-        // })
-   
+        // 9. 处理音效
+        // fsDir.copyFileSync
+        
+        // console.log(this.audio+ this.testExport)
+//  await fs.copyFileSync(`${this.src}/testxml/${item.name.toLowerCase()}.bat`, `${this.testExport}/testxml/${item.name.toLowerCase()}.bat`)
         this.name = ''
         this.showMask = false
         if (this.lackBatList.size > 0 || this.lackFileList.length > 0) {

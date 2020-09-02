@@ -1,7 +1,7 @@
 <template>
 <div class="layout">
   <transition   name="pannel">
-  <Pannel ref="pannel" :tl396="tl396" :tl423="tl423" :usb2="usb2" :usb3="usb3" :bios="bios"  :nextList1 ="nextList1" :nextList2="nextList2" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
+  <Pannel :audio=" audio? audio.total: ''" ref="pannel" :tl396="tl396" :tl423="tl423" :usb2="usb2" :usb3="usb3" :bios="bios"  :nextList1 ="nextList1" :nextList2="nextList2" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
   </transition>
  
   <div class="boxBig">
@@ -77,22 +77,24 @@
      <div class="title" style="font-size: 14px;font-weight: bold">{{item.title}}:</div>
       <el-checkbox v-for="city in item.children" :label="city.name" :key="city.name">{{city.name}}</el-checkbox>
    </div>
-  
-  
  <el-button @click="setLan"  type="primary">确定</el-button>
  <el-button @click="showLan = false"  type="primary">取消</el-button>
 </el-dialog>
 <el-dialog    width="500px"  :visible.sync="showAudio"      :show-close="false"
-  :close-on-click-modal="false" title="Audio设置">
-  <div >
-    <el-radio-group @change="changeAudio" v-model="audio">
-    <el-radio :label="F3">F3</el-radio>
-    <el-radio :label="F5">F5</el-radio>
-    <el-radio :label="F6">F6</el-radio>
+  :close-on-click-modal="false" title="Audio孔设置">
+  <div style="display:flex">
+  <div style="width: 300px;display:flex;alignItems:center" >
+    <el-radio-group v-model="audio">
+      
+    <el-radio :key="item.total" v-for="item in audioInfo" :label="item">{{item.total}}孔</el-radio>
   </el-radio-group>
   </div>
+  <div style="width:200px;height:200px;border: 1px dashed green;font-size:18px;line-height:200px;color:green;text-align:center">
+    {{audio.msg ?`你选择的是${audio.msg}孔!`: '请选择音效孔个数!'}}
+  </div>
+  </div>
 
- <el-button style="margin-top: 20px" @click="setLan"  type="primary">确定</el-button>
+ <el-button  style="margin-top: 20px" @click="setAudio"  type="primary">确定</el-button>
  <el-button @click="showAudio = false"  type="primary">取消</el-button>
 </el-dialog>
   </div>
@@ -117,7 +119,7 @@ export default {
       showUSB: false,
       showLan: false,
       showAudio: false,
-      audio: 'f3',
+      audio: '',
       bios:{
         version: '',
         release: ''
@@ -126,6 +128,7 @@ export default {
       usb3: 0,
       tl396: 0,
       tl423: 0,
+      audioInfo: [],
       nextList1: [],
       nextList2:[],
       secretList:[],
@@ -146,11 +149,12 @@ export default {
      let data3 = JSON.parse(fs.readFileSync('./test3.json','utf8'))
      this.test3 = data3
      this.lanInfo = JSON.parse(fs.readFileSync('./lan.json','utf8'))
+     this.audioInfo = JSON.parse(fs.readFileSync('./audio.json','utf8'))
     
   },
   methods: {
-    changeAudio () {
-      console.log(this.audio)
+    setAudio () {
+      this.showAudio = false
     },
     setLan () {
       // console.log(this.$refs.lan[0].children[1].classList.length)
@@ -273,6 +277,8 @@ this.showPanel = false
               this.showUSB = true
           } else if (this.test3[i]['name'] === 'tl396' &&  this.tl396 === 0) {
              this.showUSB = true
+          } else if (this.test3[i]['name'] === 'audio' && this.audio.length === 0){
+             this.showAudio = true
           } else {
              this.test3[i]['selected'] = !this.test3[i]['selected']
           }
@@ -303,6 +309,9 @@ this.showPanel = false
 </script>
 
 <style  scope lang="scss">
+>>>.el-radio{
+  margin: 8px;
+}
 .layout{
   display: flex;
   justify-content: center;
