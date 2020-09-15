@@ -1,5 +1,7 @@
 [
-  {"title": "RTL","children": [{"name":"8111D","selected": false},{"name":"8111H","selected": false},{"name":"8125D","selected": false}]},
+  {"title": "RTL","children":
+     [{"name":"8111D","selected": false},{"name":"8111H","selected": false},{"name":"8125D","selected": false}]
+  },
   {"title": "Intel","children":[{"name":"I211","selected": false},{"name":"I219","selected": false},{"name":"I225","selected": false}]},
   {"title": "Killer","children": [{"name":"killer1","selected": false},{"name":"killer2","selected": false},{"name":"killer3","selected": false}]}
 ]

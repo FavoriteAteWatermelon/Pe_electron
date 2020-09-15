@@ -72,7 +72,6 @@
     <div class="close-btn" @click="showErr=false">x</div>
   <div class="err-title" >缺少批处理文件</div>
     <div class="item" v-for="(item) in  lackBatList.values()" :key="item.name">
-
        {{item}}
    </div>
   <div class="err-title">缺少处理文件对应的文件夹</div>
@@ -95,6 +94,10 @@ const fsDir = require('fs-extra')
 const process = require('child_process')
   export default {
     props: {
+      lanList: {
+        type: Array,
+        default: []
+      },
       audio: {
         type: String,
         default: ''
@@ -152,7 +155,6 @@ const process = require('child_process')
       this.$refs.log.$el.getElementsByClassName('el-dialog')[0].style.height = '200px'
      
       // console.log(this.secretList)
-
     },
     methods: {
       showErrPanel () {
@@ -163,6 +165,8 @@ const process = require('child_process')
       this.showName = true
       },
       test() {
+        console.log(this.lanList)
+        console.log(this.secretList)
         // console.log(this.bios)
       },
       comfirm() {
@@ -185,6 +189,7 @@ const process = require('child_process')
       this.showMask = true
       this.lackBatList = new Set()
       this.lackFileList = []
+      let that = this
       setTimeout(async()=>{
       fsDir.remove(this.testExport,async(err)=>{
       // 1. 第一步复制所必须的需求文件,此步骤不会报错
@@ -195,12 +200,18 @@ const process = require('child_process')
         // 2. 读取需要的1端和2段程式，有可能会没有会有应该提示报错
      
         let content = ''
-        try {
+        if (item.name === 'lan_c' ||item.name === 'lan_w') {
+
+        } else {
+            try {
            content = await  fs.readFileSync(`${this.src}/backup/${item.name.toLowerCase()}.bat`,'utf-8')
-        }catch(e) {
-          // 第一二段缺少copy .bat
-          this.lackBatList.add(item.name)
+            }catch(e) {
+              // 第一二段缺少copy .bat
+              this.lackBatList.add(item.name)
+            }
+
         }
+
         // 3. copy需要的1段和2段程式,没有的话会报错跟上面一样
         if (item.name === 'usb20') {
            let contentRes = content.replace(new RegExp(/#usb2/,'g'), `wUSB2det /COUNT ${this.usb2}\r\nif not ERRORLEVEL 1 goto end\r\nping 127.0.0.1 -n 5 >nul\r\nwUSB2det /COUNT ${this.usb2}\r\nif not ERRORLEVEL 1 goto end\r\nping 127.0.0.1 -n 5 >nul\r\nwUSB2det /COUNT ${this.usb2}\r\nif not ERRORLEVEL 1 goto end\r\n`)
@@ -214,6 +225,152 @@ const process = require('child_process')
         }else if (item.name === 'tl423') {
           let contentRes = content.replace(new RegExp(/#423/,'g'),`Wtl423 /NUM:${this.tl423}\r\nif not errorlevel 1 goto pass\r\ntimeout /t 3\r\n Wtl423 /NUM:${this.tl423}\r\nif not errorlevel 1 goto pass\r\ntimeout /t 3\r\nWtl423 /NUM:${this.tl423}\r\nif not errorlevel 1 goto pass\r\n`)
            await  fs.writeFileSync(`${this.testExport}/backup/${item.name.toLowerCase()}.bat`,contentRes,'utf8')
+        } else if (item.name === 'lan_w') {
+          let lanContent = ''
+          if (this.lanList.length === 1) {
+              try{
+                await fs.copyFileSync(`${this.src}/lan/${this.lanList[0]}/lan_w.bat`, `${this.testExport}/backup/lan_w.bat`)
+              }catch(e) {
+                this.lackFileList.push(item.name)
+              }
+                          try {
+              lanContent = await  fs.readFileSync(`${this.src}/lan/${this.lanList[0]}/lan_c.bat`,'utf-8')
+            }catch(e) {
+              // 第一二段缺少copy .bat
+              this.lackBatList.add(this.lanList[0])
+            }
+            let re = /.*(cd\\testap\\.*).*/g
+            let dirList = lanContent.match(re)
+            // console.log(dirList)
+            if (dirList!==null && dirList.length > 0) {
+              dirList.forEach(async (mitem,i) =>{
+                let str = mitem.replace('cd\\testap\\','').toLowerCase().trim()
+              
+                if(mitem === 'cd\\testap\\backup' || str.trim().toLowerCase() === 'backup'){
+                }else {
+                  // 4. 检查内容copy依赖test1和test2的file
+                  try{
+                    await fsDir.copySync(this.src + '/' + str,this.testExport + '/' + str )
+                  }catch(e) {
+                    // 依赖文件夹没有str
+                    this.lackFileList.push({[item.name]:str})
+                  }
+                }
+              
+              })
+            } 
+          } else if (this.lanList.length >= 2){
+            lanContent = ''
+            this.lanList.forEach(async(item, i) => {
+              try{
+                await fs.copyFileSync(`${this.src}/lan/${this.lanList[i]}/lan_w.bat`, `${this.testExport}/backup/lan${i + 1}_w.bat`)
+              }catch(e) {
+                this.lackFileList.push(item.name)
+              }
+              try {
+              lanContent = await  fs.readFileSync(`${this.src}/lan/${this.lanList[i]}/lan_c.bat`,'utf-8')
+            }catch(e) {
+              // 第一二段缺少copy .bat
+              this.lackBatList.add(this.lanList[0])
+            }
+            let re = /.*(cd\\testap\\.*).*/g
+            let dirList = lanContent.match(re)
+            // console.log(dirList)
+            if (dirList!==null && dirList.length > 0) {
+              dirList.forEach(async (mitem,i) =>{
+                let str = mitem.replace('cd\\testap\\','').toLowerCase().trim()
+              
+                if(mitem === 'cd\\testap\\backup' || str.trim().toLowerCase() === 'backup'){
+                }else {
+                  // 4. 检查内容copy依赖test1和test2的file
+                  try{
+                    await fsDir.copySync(this.src + '/' + str,this.testExport + '/' + str )
+                  }catch(e) {
+                    // 依赖文件夹没有str
+                    this.lackFileList.push({[item.name]:str})
+                  }
+                }
+              
+              })
+            } 
+            
+            })
+          }
+           
+        }else if (item.name === 'lan_c') {
+          let lanContent = ''
+          if (this.lanList.length === 1) {
+              try{
+                await fs.copyFileSync(`${this.src}/lan/${this.lanList[0]}/lan_c.bat`, `${this.testExport}/backup/lan_c.bat`)
+              }catch(e) {
+                that.lackFileList.push(this.lanList[0])
+              }
+            try {
+              lanContent = await  fs.readFileSync(`${this.src}/lan/${this.lanList[0]}/lan_c.bat`,'utf-8')
+            }catch(e) {
+              // 第一二段缺少copy .bat
+              this.lackBatList.add(this.lanList[0])
+            }
+            let re = /.*(cd\\testap\\.*).*/g
+            let dirList = lanContent.match(re)
+            // console.log(dirList)
+            if (dirList!==null && dirList.length > 0) {
+              dirList.forEach(async (mitem,i) =>{
+                let str = mitem.replace('cd\\testap\\','').toLowerCase().trim()
+              
+                if(mitem === 'cd\\testap\\backup' || str.trim().toLowerCase() === 'backup'){
+                }else {
+                  // 4. 检查内容copy依赖test1和test2的file
+                  try{
+                    await fsDir.copySync(this.src + '/' + str,this.testExport + '/' + str )
+                  }catch(e) {
+                    // 依赖文件夹没有str
+                    that.lackFileList.push({[item.name]:str})
+                  }
+                }
+              
+              })
+            } 
+          } else if (this.lanList.length >= 2) {
+            let lanContent = ''
+            this.lanList.forEach(async(item, i) => {
+              try{
+                await fs.copyFileSync(`${this.src}/lan/${this.lanList[i]}/lan_c.bat`, `${this.testExport}/backup/lan${i + 1}_c.bat`)
+                
+              }catch(e) {
+                that.lackFileList.push(this.lanList[i])
+              }
+              try {
+              lanContent = await  fs.readFileSync(`${this.src}/lan/${this.lanList[i]}/lan_c.bat`,'utf-8')
+            }catch(e) {
+              // 第一二段缺少copy .bat
+              this.lackBatList.add(this.lanList[0])
+            }
+            let re = /.*(cd\\testap\\.*).*/g
+            let dirList = lanContent.match(re)
+            // console.log(dirList)
+            if (dirList!==null && dirList.length > 0) {
+              dirList.forEach(async (mitem,i) =>{
+                let str = mitem.replace('cd\\testap\\','').toLowerCase().trim()
+              
+                if(mitem === 'cd\\testap\\backup' || str.trim().toLowerCase() === 'backup'){
+                }else {
+                  // 4. 检查内容copy依赖test1和test2的file
+                  try{
+                    await fsDir.copySync(this.src + '/' + str,this.testExport + '/' + str )
+                  }catch(e) {
+                    // 依赖文件夹没有str
+                    that.lackFileList.push({[item.name]:str})
+                  }
+                }
+              
+              })
+            } 
+            
+            })
+
+          }
+           
         }else {
           try{
               await fs.copyFileSync(`${this.src}/backup/${item.name.toLowerCase()}.bat`, `${this.testExport}/backup/${item.name.toLowerCase()}.bat`)
@@ -252,8 +409,25 @@ const process = require('child_process')
         let allList = this.nextList1.concat(this.nextList2).concat(this.secretList)
         let logotem = ''
         allList.forEach((item,index) => {
-          logotem = logotem +`\r\nset test=${item.name.toLowerCase()}.bat\r\nfind "%test%" d:\\testap\\test.log\r\nif errorlevel 1 goto fail\r\n\r\n`
-
+          if(item.name.toLowerCase() === 'lan_w') {
+            if (this.lanList.length === 1) {
+               logotem = logotem +`\r\nset test=lan_w.bat\r\nfind "%test%" d:\\testap\\test.log\r\nif errorlevel 1 goto fail\r\n\r\n`
+            } else if (this.lanList.length >= 2) {
+              this.lanList.forEach((item, index) => {
+                logotem = logotem +`\r\nset test=lan${index + 1}_w.bat\r\nfind "%test%" d:\\testap\\test.log\r\nif errorlevel 1 goto fail\r\n\r\n`
+              })
+            }
+          } else if (item.name.toLowerCase() === 'lan_c') {
+            if (this.lanList.length === 1) {
+               logotem = logotem +`\r\nset test=lan_c.bat\r\nfind "%test%" d:\\testap\\test.log\r\nif errorlevel 1 goto fail\r\n\r\n`
+            } else if (this.lanList.length >= 2) {
+              this.lanList.forEach((item, index) => {
+                logotem = logotem +`\r\nset test=lan${index + 1}_c.bat\r\nfind "%test%" d:\\testap\\test.log\r\nif errorlevel 1 goto fail\r\n\r\n`
+              })
+            }
+          } else {
+             logotem = logotem +`\r\nset test=${item.name.toLowerCase()}.bat\r\nfind "%test%" d:\\testap\\test.log\r\nif errorlevel 1 goto fail\r\n\r\n`
+          }
         })
         let logRes = logInfo.replace( new RegExp(/#checklog/,'g'), logotem)
         await fs.writeFileSync(this.testExport + '/backup/' + 'chklog.bat',logRes,'utf8')
@@ -270,10 +444,49 @@ const process = require('child_process')
         this.list = this.nextList1.concat(this.nextList2)
         this.list.forEach((item,index)=>{
           if (item.station === 1) {
-            tem1 = tem1 + 'call ' + item.name + '.bat' + '\r\n'
+            if (item.name === 'lan_w') {
+              if (this.lanList.length === 1) {
+                tem1 = tem1 + 'call ' + 'lan_w' + '.bat' + '\r\n'
+              }else if (this.lanList.length >= 2) {
+                this.lanList.forEach((name,index) => {
+                  tem1 = tem1 + 'call ' + `lan${index + 1}_w` + '.bat' + '\r\n'
+                })
+              }
+
+            }else if (item.name === 'lan_c'){
+              if (this.lanList.length === 1) {
+                tem1 = tem1 + 'call ' + 'lan_c' + '.bat' + '\r\n'
+              }else if (this.lanList.length >= 2) {
+                this.lanList.forEach((name,index) => {
+                  tem1 = tem1 + 'call ' + `lan${index + 1}_c` + '.bat' + '\r\n'
+                })
+              }
+            }else {
+              tem1 = tem1 + 'call ' + item.name + '.bat' + '\r\n'
+            }
+            
            
           } else {
-            tem2 = tem2 + 'call ' + item.name +'.bat' + '\r\n'
+            if (item.name === 'lan_w') {
+              if (this.lanList.length === 1) {
+                tem2 = tem2 + 'call ' + 'lan_w' + '.bat' + '\r\n'
+              }else if (this.lanList.length >= 2) {
+                this.lanList.forEach((name,index) => {
+                  tem2 = tem2 + 'call ' + `lan${index + 1}_w` + '.bat' + '\r\n'
+                })
+              }
+
+            }else if (item.name === 'lan_c'){
+              if (this.lanList.length === 1) {
+                tem2 = tem2 + 'call ' + 'lan_c' + '.bat' + '\r\n'
+              }else if (this.lanList.length >= 2) {
+                this.lanList.forEach((name,index) => {
+                  tem2 = tem2 + 'call ' + `lan${index + 1}_c` + '.bat' + '\r\n'
+                })
+              }
+            }else {
+              tem2 = tem2 + 'call ' + item.name + '.bat' + '\r\n'
+            }
           }
         })
 
@@ -289,8 +502,9 @@ const process = require('child_process')
         let xmlInfo = fs.readFileSync(this.src+ '/' + 'MSITEST.xml','utf8')
         
         let  tem3 = ''
+        // if (this.secretList.indexOf(''))
         this.secretList.forEach((item,index)=>{
-     
+            
             tem3 = tem3 + `<Point ID="${index + 1}"><Desc>${item.name}</Desc></Point>` + '\r\n'
  
         })
@@ -303,9 +517,28 @@ const process = require('child_process')
          // copy MSITEST.xml到wencode目录一份
         await fs.writeFileSync(this.testExport + '/wencode/' + 'MSITEST.xml',xmlRes,'utf8')
         // 创建testxml
-        await fs.mkdirSync(this.testExport +'/testxml/')
 
+        await fs.mkdirSync(this.testExport +'/testxml/')
+        let that = this
         this.secretList.forEach(async (item,index)=>{
+        if (/lan.?_c/.test(item.name)) {
+          if (this.lanList.length === 1) {
+                try{
+                    await fs.copyFileSync(`${this.src}/lan/${this.lanList[0]}/lan_c.bat`, `${this.testExport}/testxml/lan_c.bat`)
+                }catch(e) {
+                  this.lackBatList.add(item)
+                }
+          } else {
+            this.lanList.forEach(async(itemChild, i)=>{
+                try{
+                    await fs.copyFileSync(`${this.src}/lan/${itemChild}/lan_c.bat`, `${this.testExport}/testxml/lan${i + 1}_c.bat`)
+                }catch(e) {
+                  this.lackBatList.add(itemChild)
+                }
+            })
+          }
+          
+        } else {
         // 读取加密文件的内容
         let content = ''
         try {
@@ -362,12 +595,17 @@ const process = require('child_process')
            await fs.renameSync(`${this.testExport}/hdtest/F${this.audio}.cfg`, `${this.testExport}/hdtest/FRONT.cfg`)
            await fs.renameSync(`${this.testExport}/hdtest/R${this.audio}.cfg`, `${this.testExport}/hdtest/REAR.cfg`)
         } 
+        }
+
         // await fsDir.copySync(`${this.src}/${item.name.toLowerCase()}`,`${this.testExport}/${item.name.toLowerCase()}`)
       },1000)
         
         // 对文件加密
         this.decodeXml()
-        // await fs.mkdirSync(this.testExport + '/BATCH')
+
+        if (!fs.existsSync(this.testExport + '/batch')) {
+          await fs.mkdirSync(this.testExport + '/batch')
+        }
         this.secretList.forEach((item,index)=>{
           // console.log(item)
           this.decodeAll(item.name)
@@ -432,7 +670,7 @@ const process = require('child_process')
       });
       let that = this
       readerStream.on('end',function(){
-       fs.writeFileSync(that.testExport + '/BATCH/' + name+'.bat',data,'utf8')
+       fs.writeFileSync(that.testExport + '/batch/' + name+'.bat',data,'utf8')
       });
 
       readerStream.on('error', function(err){

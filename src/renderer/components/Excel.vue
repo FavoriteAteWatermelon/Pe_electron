@@ -1,7 +1,7 @@
 <template>
 <div class="layout">
   <transition   name="pannel">
-  <Pannel :audio=" audio? audio.total: ''" ref="pannel" :tl396="tl396" :tl423="tl423" :usb2="usb2" :usb3="usb3" :bios="bios"  :nextList1 ="nextList1" :nextList2="nextList2" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
+  <Pannel :lanList="lanList" :audio=" audio? audio.total: ''" ref="pannel" :tl396="tl396" :tl423="tl423" :usb2="usb2" :usb3="usb3" :bios="bios"  :nextList1 ="nextList1" :nextList2="nextList2" :secretList="secretList" @closePannel="closePannel" v-show="showPanel" class="pannel"></Pannel>
   </transition>
  
   <div class="boxBig">
@@ -75,10 +75,9 @@
   :close-on-click-modal="false" title="Lan设置">
    <div ref="lan" v-for="item in lanInfo " :key="item.title" style="margin-bottom: 10px;border-bottom: 1px solid #eee">
      <div class="title" style="font-size: 14px;font-weight: bold">{{item.title}}:</div>
-      <el-checkbox v-for="city in item.children" :label="city.name" :key="city.name">{{city.name}}</el-checkbox>
+      <el-checkbox v-for="city in item.children" :label="city.name" v-model="city.selected" :key="city.name">{{city.name}}</el-checkbox>
    </div>
- <el-button @click="setLan"  type="primary">确定</el-button>
- <el-button @click="showLan = false"  type="primary">取消</el-button>
+ <el-button @click="setLan"   type="primary">确定</el-button>
 </el-dialog>
 <el-dialog    width="500px"  :visible.sync="showAudio"      :show-close="false"
   :close-on-click-modal="false" title="Audio孔设置">
@@ -128,6 +127,7 @@ export default {
       usb3: 0,
       tl396: 0,
       tl423: 0,
+      lanList: [],
       audioInfo: [],
       nextList1: [],
       nextList2:[],
@@ -157,9 +157,18 @@ export default {
       this.showAudio = false
     },
     setLan () {
+      this.lanList = []
       // console.log(this.$refs.lan[0].children[1].classList.length)
-      console.log(this.$refs.lan[0].children[1].innerText)
-      // innerText
+      this.showLan = false
+      this.lanInfo.forEach(item=>{
+        // console.log(item)
+         item.children.map(c =>{
+          if (c.selected ) {
+            this.lanList.push(c.name)
+          }
+        })
+        // this.lanList = item.children.filter((c)=>{return c.selected ===})
+      })
     },
     setUSB () {
       if (this.usb2 >0 && this.usb3 >0 && this.tl423 >=0 && this.tl396 >= 0) {
@@ -218,8 +227,19 @@ export default {
         }
       })
       this.test3.forEach(item => {
-              if (item.selected === true) {
-          this.secretList.push(item)
+        if (item.selected === true) {
+            if (item.name === 'lan_c') {
+              if(this.lanList.length ===1 ) {
+                this.secretList.push({"name": "lan_c", "station": 1,"selected": true,  "items" :[0]})
+              } else if (this.lanList.length >=2) {
+                this.lanList.forEach((item,index)=> {
+                  this.secretList.push({"name": `lan${index + 1}_c`, "station": 1,"selected": true,  "items" :[0]})
+                })
+              }
+            }else {
+              this.secretList.push(item)
+            }
+         
         }
       })
       // console.log()
@@ -239,6 +259,8 @@ this.showPanel = false
         } else if ((this.usb2 === 0 || this.usb3 === 0) && (this.test1[i]['name'] === 'usb20' || this.test1[i]['name'] === 'usb30'||  this.test1[i]['name'] === 'tl396'|| this.test1[i]['name'] === 'tl423')){
           // console.log(  this.test1[i])
             this.showUSB = true
+        }else if (this.test1[i]['name'] === 'lan_w' &&  this.lanList.length === 0) {
+          this.showLan = true
         }else {
           if (this.test1[i]['name'] === 'tl423' &&  this.tl423 === 0) {
               this.showUSB = true
@@ -259,7 +281,12 @@ this.showPanel = false
               this.showUSB = true
           } else if (this.testList[i]['name'] === 'tl396' &&  this.tl396 === 0) {
              this.showUSB = true
-          } else {
+          } else if (this.testList[i]['name'] === 'lan_c' &&  this.lanList.length === 0 )
+          {
+
+            this.showLan = true
+          }
+          else {
           this.testList[i]['selected'] = !this.testList[i]['selected']
             }
          }
@@ -279,6 +306,10 @@ this.showPanel = false
              this.showUSB = true
           } else if (this.test3[i]['name'] === 'audio' && this.audio.length === 0){
              this.showAudio = true
+          }else if (this.test3[i]['name'] === 'lan_c' &&  this.lanList.length === 0 )
+          {
+
+            this.showLan = true
           } else {
              this.test3[i]['selected'] = !this.test3[i]['selected']
           }
